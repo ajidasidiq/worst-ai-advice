@@ -20,8 +20,14 @@ def main() -> None:
         raise SystemExit(f"entry must be 1-140 characters, got {len(line)}")
     if not line.strip() or "\n" in line or "\r" in line:
         raise SystemExit("entry must be a single non-blank line")
+    if any(ord(ch) < 32 for ch in line):
+        raise SystemExit("entry must not contain control characters")
+    if len(line.encode("utf-8")) > 140:
+        raise SystemExit("entry must be at most 140 bytes")
     out_path = os.environ.get("OUTPUT_PATH", "/output/entry.txt")
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    parent = os.path.dirname(out_path)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(line)
     with open(out_path, encoding="utf-8") as f:
